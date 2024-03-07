@@ -1,0 +1,26 @@
+# https://docs.fastlane.tools/
+
+envs = [
+  { name: "dev", id_suffix: ".dev", build_type: "ReleaseDev" },
+  { name: "stage", id_suffix: ".stage", build_type: "ReleaseStage" },
+  { name: "prod", id_suffix: "", build_type: "Release" }
+]
+
+# deploy
+lane :deploy do |options|
+  selected_env = envs.select { |env| env[:name] == options[:env] }.first
+
+  gradle(
+    task: "bundle",
+    build_type: selected_env[:build_type]
+  )
+
+  upload_to_play_store(
+    package_name: "#{ENV["BE_APP_APPLICATION_ID"]}#{selected_env[:id_suffix]}",
+    track: "internal", # @todo
+    release_status: "draft", # @todo
+    # json_key: ENV["BE_GOOGLE_PLAY_JSON_KEY_FILE_PATH"],
+    json_key_data: ENV["BE_GOOGLE_PLAY_JSON_KEY_CONTENT"],
+    skip_upload_apk: true
+  )
+end

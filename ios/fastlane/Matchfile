@@ -1,0 +1,16 @@
+# https://docs.fastlane.tools/actions/match
+
+storage_mode(ENV["BE_FASTLANE_MATCH_STORAGE"]) # "s3" or "git"
+
+# s3
+s3_bucket(ENV["BE_FASTLANE_MATCH_S3_BUCKET_NAME"])
+s3_object_prefix("#{ENV["BE_APPLE_DEVELOPER_TEAM_ID"]}/".downcase)
+
+# s3_region(ENV["BE_FASTLANE_MATCH_S3_AWS_REGION"])
+# s3_access_key(ENV["BE_FASTLANE_MATCH_S3_AWS_ACCESS_KEY_ID"])
+# s3_secret_access_key(ENV["BE_FASTLANE_MATCH_S3_AWS_SECRET_ACCESS_KEY"])
+
+# git
+# git_url(ENV["BE_FASTLANE_MATCH_GIT_URL"])
+# git_branch(ENV["BE_APPLE_DEVELOPER_TEAM_ID"])
+# git_private_key(ENV["BE_FASTLANE_MATCH_GIT_SSH_PRIVATE_KEY"])

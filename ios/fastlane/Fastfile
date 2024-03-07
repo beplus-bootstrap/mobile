@@ -1,0 +1,199 @@
+# https://docs.fastlane.tools/
+
+envs = [
+  { name: "dev", id_suffix: ".dev", configuration: "ReleaseDev" },
+  { name: "stage", id_suffix: ".stage", configuration: "ReleaseStage" },
+  { name: "prod", id_suffix: "", configuration: "Release" }
+]
+
+lane :apps do |options|
+  enable_services = {
+    # associated_domains: "on",
+    # push_notification: "on",
+    # ...
+  }
+
+  # debug
+  produce(
+    username: ENV["BE_FASTLANE_USERNAME"],
+    app_identifier: "#{ENV["BE_APP_BUNDLE_ID"]}.debug",
+    app_name: "#{ENV["BE_APP_NAME"]}-debug",
+    language: "en-US",
+    # Necessary when in multiple teams.
+    team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+    team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+    skip_itc: true,
+    # Services
+    enable_services: enable_services
+  )
+
+  if options[:env].to_s.strip.empty?
+    envs.each { |env|
+      produce(
+        username: ENV["BE_FASTLANE_USERNAME"],
+        app_identifier: "#{ENV["BE_APP_BUNDLE_ID"]}#{env[:id_suffix]}",
+        app_name: "#{ENV["BE_APP_NAME"]}-#{env[:name]}",
+        language: "en-US",
+        # Necessary when in multiple teams.
+        team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+        team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+        # https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/user/detail
+        itc_team_id: ENV["BE_APPSTORE_CONNECT_TEAM_ID"],
+        itc_team_name: ENV["BE_APPSTORE_CONNECT_TEAM_NAME"],
+        # Services
+        enable_services: enable_services
+      )
+    }
+  elsif
+    specific_env = envs.select { |env| env[:name] == options[:env] }.first
+    produce(
+      username: ENV["BE_FASTLANE_USERNAME"],
+      app_identifier: "#{ENV["BE_APP_BUNDLE_ID"]}#{specific_env[:id_suffix]}",
+      app_name: "#{ENV["BE_APP_NAME"]}-#{specific_env[:name]}",
+      language: "en-US",
+      # Necessary when in multiple teams.
+      team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+      team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+      # https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/user/detail
+      itc_team_id: ENV["BE_APPSTORE_CONNECT_TEAM_ID"],
+      itc_team_name: ENV["BE_APPSTORE_CONNECT_TEAM_NAME"],
+      # Services
+      enable_services: enable_services
+    )
+  end
+end
+
+# This `signing_sync` lane runs before the `deploy` to READ & install certificates & provisioning profiles
+lane :signing_sync do |options|
+  api_key = app_store_connect_api_key(
+    key_id: ENV["BE_APPSTORE_CONNECT_KEY_ID"],
+    issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
+    # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
+    key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
+    duration: 1200,
+    in_house: false
+  )
+
+  readonly = options[:readonly] != false
+  force = options[:force] == true
+
+  # register_devices(
+  #   api_key: api_key,
+  #   devices_file: ENV["BE_APPLE_DEVELOPER_DEVICES_FILE_PATH"],
+  #   team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+  #   team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+  # )
+
+  # debug
+  match(
+    api_key: api_key,
+    type: "development",
+    readonly: readonly,
+    force: force,
+    app_identifier: [
+      "#{ENV["BE_APP_BUNDLE_ID"]}.debug"
+    ],
+    # Necessary when in multiple teams.
+    team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+    team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+  )
+
+  if options[:env].to_s.strip.empty?
+    # dev, stage, prod
+    match(
+      api_key: api_key,
+      type: "appstore",
+      readonly: readonly,
+      force: force,
+      app_identifier: envs.map { |env| "#{ENV["BE_APP_BUNDLE_ID"]}#{env[:id_suffix]}" },
+      # Necessary when in multiple teams.
+      team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+      team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+    )
+  elsif
+    specific_env = envs.select { |env| env[:name] == options[:env] }.first
+    match(
+      api_key: api_key,
+      type: "appstore",
+      readonly: readonly,
+      force: force,
+      app_identifier: "#{ENV["BE_APP_BUNDLE_ID"]}#{specific_env[:id_suffix]}",
+      # Necessary when in multiple teams.
+      team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+      team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+    )
+  end
+end
+
+lane :nuke do
+  api_key = app_store_connect_api_key(
+    key_id: ENV["BE_APPSTORE_CONNECT_KEY_ID"],
+    issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
+    # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
+    key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
+    duration: 1200,
+    in_house: false
+  )
+
+  match_nuke(
+    type: "development",
+    api_key: api_key,
+    # Necessary when in multiple teams.
+    team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+    team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+  )
+
+  match_nuke(
+    type: "appstore",
+    api_key: api_key,
+    # Necessary when in multiple teams.
+    team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+    team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+  )
+end
+
+# deploy
+lane :deploy do |options|
+  api_key = app_store_connect_api_key(
+    key_id: ENV["BE_APPSTORE_CONNECT_KEY_ID"],
+    issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
+    # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
+    key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
+    duration: 1200,
+    in_house: false
+  )
+
+  setup_ci
+
+  selected_env = envs.select { |env| env[:name] == options[:env] }.first
+  
+  sync_code_signing(
+    api_key: api_key,
+    type: "appstore",
+    readonly: true,
+    app_identifier: [
+      "#{ENV["BE_APP_BUNDLE_ID"]}#{selected_env[:id_suffix]}"
+    ],
+    # Necessary when in multiple teams.
+    team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"],
+    team_name: ENV["BE_APPLE_DEVELOPER_TEAM_NAME"],
+  )
+
+  build_app(
+    workspace: "beplus.xcworkspace",
+    scheme: "beplus#{selected_env[:id_suffix]}",
+    configuration: selected_env[:configuration],
+    output_name: "beplus-#{selected_env[:name]}.ipa"
+  )
+
+  upload_to_testflight(
+    api_key: api_key,
+    app_identifier: "#{ENV["BE_APP_BUNDLE_ID"]}#{selected_env[:id_suffix]}",
+    apple_id: ENV["BE_APP_APPLE_ID"],
+    team_id: ENV["BE_APPSTORE_CONNECT_TEAM_ID"], # itc_team_id
+    team_name: ENV["BE_APPSTORE_CONNECT_TEAM_NAME"], # itc_team_name
+    dev_portal_team_id: ENV["BE_APPLE_DEVELOPER_TEAM_ID"], # team_id
+    skip_waiting_for_build_processing: true,
+    submit_beta_review: false
+  )
+end
