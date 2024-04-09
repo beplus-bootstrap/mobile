@@ -1,5 +1,7 @@
 # https://docs.fastlane.tools/
 
+skip_docs
+
 envs = [
   { name: "dev", id_suffix: ".dev", configuration: "ReleaseDev" },
   { name: "stage", id_suffix: ".stage", configuration: "ReleaseStage" },
@@ -70,7 +72,7 @@ lane :signing_sync do |options|
     issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
     # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
     key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
-    duration: 1200,
+    duration: 1200, # max
     in_house: false
   )
 
@@ -131,7 +133,7 @@ lane :nuke do
     issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
     # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
     key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
-    duration: 1200,
+    duration: 1200, # max
     in_house: false
   )
 
@@ -159,7 +161,7 @@ lane :deploy do |options|
     issuer_id: ENV["BE_APPSTORE_CONNECT_KEY_ISSUER_ID"],
     # key_filepath: ENV["BE_APPSTORE_CONNECT_KEY_FILE_PATH"],
     key_content: ENV["BE_APPSTORE_CONNECT_KEY_CONTENT"],
-    duration: 1200,
+    duration: 1200, # max
     in_house: false
   )
 

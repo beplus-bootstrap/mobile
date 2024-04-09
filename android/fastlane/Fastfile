@@ -1,5 +1,7 @@
 # https://docs.fastlane.tools/
 
+skip_docs
+
 envs = [
   { name: "dev", id_suffix: ".dev", build_type: "ReleaseDev" },
   { name: "stage", id_suffix: ".stage", build_type: "ReleaseStage" },
