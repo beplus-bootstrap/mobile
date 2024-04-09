@@ -2,15 +2,19 @@
 
 storage_mode(ENV["BE_FASTLANE_MATCH_STORAGE"]) # "s3" or "git"
 
-# s3
-s3_bucket(ENV["BE_FASTLANE_MATCH_S3_BUCKET_NAME"])
-s3_object_prefix("#{ENV["BE_APPLE_DEVELOPER_TEAM_ID"]}/".downcase)
+if ENV["BE_FASTLANE_MATCH_STORAGE"] == "s3"
+  s3_bucket(ENV["BE_FASTLANE_MATCH_STORAGE_S3_BUCKET_NAME"])
+  s3_object_prefix("#{ENV["BE_APPLE_DEVELOPER_TEAM_ID"]}/".downcase)
 
-# s3_region(ENV["BE_FASTLANE_MATCH_S3_AWS_REGION"])
-# s3_access_key(ENV["BE_FASTLANE_MATCH_S3_AWS_ACCESS_KEY_ID"])
-# s3_secret_access_key(ENV["BE_FASTLANE_MATCH_S3_AWS_SECRET_ACCESS_KEY"])
-
-# git
-# git_url(ENV["BE_FASTLANE_MATCH_GIT_URL"])
-# git_branch(ENV["BE_APPLE_DEVELOPER_TEAM_ID"])
-# git_private_key(ENV["BE_FASTLANE_MATCH_GIT_SSH_PRIVATE_KEY"])
+  # Uncomment the following lines if you're providing access to the S3 Bucket
+  # as a part of the App beplus Configuration
+  # s3_region(ENV["BE_FASTLANE_MATCH_STORAGE_S3_AWS_REGION"])
+  # s3_access_key(ENV["BE_FASTLANE_MATCH_STORAGE_S3_AWS_ACCESS_KEY_ID"])
+  # s3_secret_access_key(ENV["BE_FASTLANE_MATCH_STORAGE_S3_AWS_SECRET_ACCESS_KEY"])
+elsif ENV["BE_FASTLANE_MATCH_STORAGE"] == "git"
+  git_url(ENV["BE_FASTLANE_MATCH_STORAGE_GIT_URL"])
+  git_branch("#{ENV["BE_APPLE_DEVELOPER_TEAM_ID"]}".downcase)
+  git_private_key(ENV["BE_FASTLANE_MATCH_STORAGE_GIT_SSH_PRIVATE_KEY"])
+else
+  # @todo
+end
