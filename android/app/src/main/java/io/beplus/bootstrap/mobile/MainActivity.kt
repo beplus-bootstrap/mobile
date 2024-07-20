@@ -1,4 +1,4 @@
-package io.beplus
+package io.beplus.bootstrap.mobile
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

@@ -1,4 +1,4 @@
-package io.beplus
+package io.beplus.bootstrap.mobile
 
 import android.app.Application
 import com.facebook.react.PackageList
