@@ -132,3 +132,8 @@ local.properties
 
 # react-native-config codegen
 ios/tmp.xcconfig
+
+# beplus
+android/app/upload.keystore
+ios/*.dSYM.zip
+ios/tmp.xcconfig
