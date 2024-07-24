@@ -76,10 +76,10 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "io.beplus.bootstrap.mobile"
+    namespace 'io.beplus.bootstrap.mobile'
 
     defaultConfig {
-        applicationId project.env.get("BE_APP_APPLICATION_ID").toString()
+        applicationId System.env.get("BE_APP_APPLICATION_ID") ? System.env.get("BE_APP_APPLICATION_ID").toString() : project.env.get("BE_APP_APPLICATION_ID").toString()
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
@@ -87,7 +87,7 @@ android {
         versionCode System.env.get("BE_APP_BUILD_NUMBER") ? System.env.get("BE_APP_BUILD_NUMBER").toInteger() : project.env.get("BE_APP_BUILD_NUMBER") ? project.env.get("BE_APP_BUILD_NUMBER").toInteger() : 1
 
         // should correspond to the "package" in Main<Activity|Application>.kt
-        resValue "string", "build_config_package", project.env.get("BE_APP_ANDROID_NAMESPACE").toString()
+        resValue "string", "build_config_package", System.env.get("BE_APP_ANDROID_NAMESPACE") ? System.env.get("BE_APP_ANDROID_NAMESPACE").toString() : project.env.get("BE_APP_ANDROID_NAMESPACE").toString()
 
         // https://developer.android.com/build/shrink-code#unused-alt-resources
         resConfigs "en"
@@ -100,7 +100,7 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file(System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_STORE_FILE_PATH") ? System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_STORE_FILE_PATH") : "upload.keystore")
+            storeFile file(System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_STORE_FILE_PATH") ? System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_STORE_FILE_PATH").toString() : "upload.keystore")
             storePassword System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_STORE_PASSWORD").toString()
             keyAlias System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_ALIAS").toString()
             keyPassword System.env.get("BE_GOOGLE_PLAY_UPLOAD_KEY_PASSWORD").toString()
